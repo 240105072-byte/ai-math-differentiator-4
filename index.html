@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Math Differentiator</title>
   <style>
     * { box-sizing: border-box; }
@@ -12,36 +12,36 @@
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f4f3ff;
-      color: #242044;
+      color: #29234d;
     }
 
     header {
       background: #5145cd;
       color: white;
-      padding: 28px 20px;
       text-align: center;
+      padding: 30px 16px;
     }
 
     header h1 { margin: 0 0 10px; }
 
     main {
       max-width: 850px;
-      margin: 30px auto;
+      margin: 28px auto;
       padding: 0 16px;
     }
 
     .card {
       background: white;
-      border-radius: 16px;
       padding: 24px;
       margin-bottom: 20px;
+      border-radius: 16px;
       box-shadow: 0 5px 20px #25205a12;
     }
 
     .levels {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      gap: 10px;
     }
 
     button {
@@ -50,9 +50,9 @@
       border-radius: 10px;
       padding: 13px;
       font-size: 15px;
+      font-weight: bold;
       background: #eeeaff;
       color: #4035a5;
-      font-weight: bold;
     }
 
     button.active, .primary {
@@ -60,7 +60,14 @@
       color: white;
     }
 
-    .levels button { min-height: 60px; }
+    button:disabled { opacity: .6; cursor: wait; }
+
+    .levels button { min-height: 58px; }
+
+    .tag {
+      color: #5145cd;
+      font-weight: bold;
+    }
 
     #question {
       font-size: 22px;
@@ -68,26 +75,23 @@
       margin: 20px 0;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 13px;
       margin: 10px 0;
       border: 1px solid #d5d0ed;
       border-radius: 10px;
       font-size: 16px;
+      background: white;
     }
 
-    .primary { width: 100%; }
+    .primary { width: 100%; margin-top: 10px; }
 
     #feedback {
-      margin-top: 16px;
+      margin-top: 18px;
       line-height: 1.7;
-      white-space: pre-line;
-    }
-
-    .tag {
-      color: #5145cd;
-      font-weight: bold;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     footer {
@@ -105,139 +109,104 @@
 <body>
   <header>
     <h1>AI Math Differentiator</h1>
-    <p>Learn mathematics at your own level</p>
+    <p>Personalized mathematics learning powered by AI</p>
   </header>
 
   <main>
     <section class="card">
       <h2>Choose your difficulty</h2>
-      <p>Select a level to get a personalized math task.</p>
       <div class="levels">
         <button class="active" data-level="basic"
-          onclick="chooseLevel('basic')">
-          Level 1 · Basic
-        </button>
+          onclick="chooseLevel('basic')">Level 1 · Basic</button>
         <button data-level="standard"
-          onclick="chooseLevel('standard')">
-          Level 2 · Standard
-        </button>
+          onclick="chooseLevel('standard')">Level 2 · Standard</button>
         <button data-level="advanced"
-          onclick="chooseLevel('advanced')">
-          Level 3 · Advanced
-        </button>
+          onclick="chooseLevel('advanced')">Level 3 · Advanced</button>
       </div>
     </section>
 
     <section class="card">
+      <h2>Personalized Math Task</h2>
+
+      <label for="topic">Mathematics topic</label>
+      <select id="topic">
+        <option value="Linear equations">Linear equations</option>
+        <option value="Quadratic equations">Quadratic equations</option>
+        <option value="Geometry">Geometry</option>
+        <option value="Percentages and proportions">Percentages and proportions</option>
+      </select>
+
       <p class="tag" id="levelName">BASIC LEVEL</p>
-      <h2>Linear Equations</h2>
-      <p id="description">
-        Solve the equation with a helpful hint.
-      </p>
+      <p id="description">A guided task with a helpful hint.</p>
       <div id="question">x + 3 = 7</div>
 
-      <label for="answer">Your answer for x:</label>
-      <input id="answer" type="number"
-        placeholder="Enter your answer">
+      <label for="answer">Your answer (if the task has a numerical answer)</label>
+      <input id="answer" type="text" placeholder="Enter your answer">
 
       <button class="primary" onclick="checkAnswer()">
         Check answer
       </button>
 
-      <button class="primary" style="margin-top:10px"
-  onclick="generateWithAI()">
-  Generate with AI ✨
-</button>
+      <button class="primary" onclick="showHint()">
+        Show hint
+      </button>
 
+      <button class="primary" id="aiButton" onclick="generateWithAI()">
+        ✨ Generate new task with AI
+      </button>
 
       <div id="feedback" aria-live="polite"></div>
     </section>
 
     <section class="card">
-      <h2>How it helps you learn</h2>
-      <p>Basic: guided steps and direct hints.</p>
-      <p>Standard: curriculum-level problem solving.</p>
-      <p>Advanced: multi-step mathematical reasoning.</p>
-      <p><strong>AI integration:</strong> Coming in the next step.</p>
+      <h2>Three levels of differentiated learning</h2>
+      <p><strong>Basic:</strong> simplified tasks and guided steps.</p>
+      <p><strong>Standard:</strong> grade-level problem solving.</p>
+      <p><strong>Advanced:</strong> multi-step challenges and applications.</p>
     </section>
   </main>
 
   <footer>AI Math Differentiator · Educational Technology & AI</footer>
-  
-
-async function generateWithAI() {
-  const feedback = document.getElementById("feedback");
-  const question = document.getElementById("question");
-  const button = document.querySelector(
-    'button[onclick="generateWithAI()"]'
-  );
-
-  feedback.textContent = "AI is creating your task...";
-  button.disabled = true;
-
-  try {
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        level: currentLevel,
-        topic: "Linear equations"
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "AI request failed");
-    }
-
-    question.textContent = "Your AI-generated task";
-    feedback.textContent = data.result;
-  } catch (error) {
-    feedback.textContent =
-      "Could not connect to AI: " + error.message +
-      "\nPlease check the Vercel deployment.";
-  } finally {
-    button.disabled = false;
-  }
-}
 
   <script>
     const tasks = {
       basic: {
         name: "BASIC LEVEL",
-        description: "Find x. Start by subtracting 3 from both sides.",
+        description: "Solve the equation using a direct hint.",
         question: "x + 3 = 7",
-        answer: 4,
-        hint: "Step 1: x + 3 = 7\nStep 2: Subtract 3 from both sides.\nStep 3: x = 7 - 3 = 4."
+        answer: "4",
+        hint: "Subtract 3 from both sides. Then x = 7 - 3 = 4."
       },
       standard: {
         name: "STANDARD LEVEL",
-        description: "Solve the equation. Show your working.",
+        description: "Solve the equation and show your working.",
         question: "3x - 5 = 16",
-        answer: 7,
-        hint: "First add 5 to both sides: 3x = 21. Then divide both sides by 3."
+        answer: "7",
+        hint: "Add 5 to both sides, then divide both sides by 3."
       },
       advanced: {
         name: "ADVANCED LEVEL",
-        description: "Solve the equation and consider how you would verify your result.",
+        description: "Solve the multi-step equation.",
         question: "2(3x - 4) + 5 = 4x + 9",
-        answer: 11,
-        hint: "Expand the brackets, collect the x terms on one side, and constants on the other."
+        answer: "5",
+        hint: "Expand the brackets: 6x - 8 + 5 = 4x + 9. Then collect like terms."
       }
     };
 
     let currentLevel = "basic";
+    let currentTask = { ...tasks.basic };
+    let isAITask = false;
 
     function chooseLevel(level) {
       currentLevel = level;
-      const task = tasks[level];
+      currentTask = { ...tasks[level] };
+      isAITask = false;
 
-      document.getElementById("levelName").textContent = task.name;
-      document.getElementById("description").textContent = task.description;
-      document.getElementById("question").textContent = task.question;
+      document.getElementById("levelName").textContent = currentTask.name;
+      document.getElementById("description").textContent =
+        currentTask.description;
+      document.getElementById("question").textContent =
+        currentTask.question;
       document.getElementById("answer").value = "";
       document.getElementById("feedback").textContent = "";
 
@@ -246,28 +215,88 @@ async function generateWithAI() {
       });
     }
 
+    function showHint() {
+      document.getElementById("feedback").textContent =
+        currentTask.hint || "Generate a task to receive an AI hint.";
+    }
+
     function checkAnswer() {
-      const value = document.getElementById("answer").value;
+      const value = document.getElementById("answer").value.trim();
       const feedback = document.getElementById("feedback");
 
-      if (value.trim() === "") {
-        feedback.textContent = "Please enter your answer first.";
+      if (!value) {
+        feedback.textContent = "Enter your answer first.";
         return;
       }
 
-      const task = tasks[currentLevel];
+      if (isAITask) {
+        feedback.textContent =
+          "For this AI-generated task, compare your answer with the solution above.";
+        return;
+      }
 
-      if (Math.abs(Number(value) - task.answer) < 0.000001) {
-        feedback.textContent = "Correct! Great work. Now try another level.";
+      if (value.toLowerCase() === currentTask.answer.toLowerCase()) {
+        feedback.textContent = "Correct! Well done!";
       } else {
-        feedback.textContent = "Not quite. Try a hint and check your steps.";
+        feedback.textContent = "Not quite. Try the hint and check your steps.";
       }
     }
 
-    function showHint() {
-      document.getElementById("feedback").textContent =
-        tasks[currentLevel].hint;
+    async function generateWithAI() {
+      const button = document.getElementById("aiButton");
+      const feedback = document.getElementById("feedback");
+      const topic = document.getElementById("topic").value;
+
+      button.disabled = true;
+      feedback.textContent = "Generating a personalized task...";
+
+      try {
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            level: currentLevel,
+            topic: topic
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "The AI request failed.");
+        }
+
+        if (!data.result) {
+          throw new Error("The AI returned an empty response.");
+        }
+
+        currentTask = {
+          name: currentLevel.toUpperCase() + " LEVEL · AI",
+          description: "Generated for your selected level and topic.",
+          question: "AI-generated task",
+          hint: "Read the AI-generated hint in the explanation below."
+        };
+
+        isAITask = true;
+
+        document.getElementById("levelName").textContent = currentTask.name;
+        document.getElementById("description").textContent =
+          currentTask.description;
+        document.getElementById("question").textContent =
+          "Read your new task and solution below.";
+
+        feedback.textContent = data.result;
+        document.getElementById("answer").value = "";
+      } catch (error) {
+        feedback.textContent =
+          "Could not connect to AI.\n" + error.message +
+          "\nCheck that the site is deployed on Vercel and the API is configured.";
+      } finally {
+        button.disabled = false;
+      }
     }
   </script>
 </body>
 </html>
+
+
