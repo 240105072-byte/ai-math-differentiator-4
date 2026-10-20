@@ -57,7 +57,7 @@ Adapt the vocabulary and explanation to the selected level.
 `;
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-latest:generateContent",
       {
         method: "POST",
         headers: {
