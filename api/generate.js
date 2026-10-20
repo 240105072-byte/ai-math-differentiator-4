@@ -1,9 +1,7 @@
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Use POST method"
-    });
+    return res.status(405).json({ error: "Use POST method" });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -16,7 +14,6 @@ export default async function handler(req, res) {
 
   try {
     const { level, topic } = req.body || {};
-
     const allowedLevels = ["basic", "standard", "advanced"];
 
     if (!allowedLevels.includes(level)) {
@@ -30,34 +27,31 @@ export default async function handler(req, res) {
         ? topic.slice(0, 100)
         : "Linear equations";
 
-    const levelInstructions = {
-      basic: "Use simple numbers, step-by-step guidance and a direct hint.",
-      standard: "Use a grade-level problem with a clear solution and hint.",
-      advanced: "Use a multi-step challenge, optionally with a real-world context."
+    const instructions = {
+      basic: "Use simple numbers and explain each step clearly.",
+      standard: "Use a grade-level problem with a hint and solution.",
+      advanced: "Create a challenging multi-step problem."
     };
 
     const prompt = `
 You are an educational mathematics tutor.
-
 Topic: ${safeTopic}
 Difficulty: ${level}
-Instructions: ${levelInstructions[level]}
+Instructions: ${instructions[level]}
 
-Generate one mathematically correct problem.
-
-Return these sections:
+Generate one mathematically correct problem in clear English.
+Include these sections:
 Problem:
 Hint:
 Step-by-step solution:
 Final answer:
 Learning objective:
 
-Use clear English. Check your calculations before responding.
-Adapt the vocabulary and explanation to the selected level.
+Check all calculations before responding.
 `;
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-latest:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
       {
         method: "POST",
         headers: {
@@ -66,9 +60,7 @@ Adapt the vocabulary and explanation to the selected level.
         },
         body: JSON.stringify({
           contents: [
-            {
-              parts: [{ text: prompt }]
-            }
+            { parts: [{ text: prompt }] }
           ],
           generationConfig: {
             temperature: 0.7,
@@ -87,24 +79,25 @@ Adapt the vocabulary and explanation to the selected level.
       });
     }
 
-    const text =
+    const result =
       data.candidates?.[0]?.content?.parts
         ?.map(part => part.text || "")
         .join("\n") || "";
 
-    if (!text) {
+    if (!result) {
+      console.error("Gemini returned no text:", data);
       return res.status(502).json({
         error: "AI returned no text. Please try again."
       });
     }
 
-    return res.status(200).json({ result: text });
+    return res.status(200).json({ result });
 
   } catch (error) {
     console.error("Generation error:", error);
-
     return res.status(500).json({
       error: "Could not generate a task. Please try again."
     });
   }
 }
+
