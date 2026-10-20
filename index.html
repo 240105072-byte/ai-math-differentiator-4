@@ -163,6 +163,46 @@
   </main>
 
   <footer>AI Math Differentiator · Educational Technology & AI</footer>
+  
+
+async function generateWithAI() {
+  const feedback = document.getElementById("feedback");
+  const question = document.getElementById("question");
+  const button = document.querySelector(
+    'button[onclick="generateWithAI()"]'
+  );
+
+  feedback.textContent = "AI is creating your task...";
+  button.disabled = true;
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        level: currentLevel,
+        topic: "Linear equations"
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "AI request failed");
+    }
+
+    question.textContent = "Your AI-generated task";
+    feedback.textContent = data.result;
+  } catch (error) {
+    feedback.textContent =
+      "Could not connect to AI: " + error.message +
+      "\nPlease check the Vercel deployment.";
+  } finally {
+    button.disabled = false;
+  }
+}
 
   <script>
     const tasks = {
